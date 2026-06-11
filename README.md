@@ -60,10 +60,39 @@ when the model supports native token streaming.
 
 See `examples/custom_backend.py`, then configure:
 
+PowerShell:
+
 ```powershell
 $env:MODEL_BACKEND_CLASS = "examples.custom_backend:CustomModelBackend"
 $env:MODEL_ID = "my-model"
 $env:MODEL_MAX_CONCURRENCY = "2"
+uv run openai-compatible-server
+```
+
+Bash or Zsh:
+
+```bash
+export MODEL_BACKEND_CLASS="examples.custom_backend:CustomModelBackend"
+export MODEL_ID="my-model"
+export MODEL_MAX_CONCURRENCY="2"
+uv run openai-compatible-server
+```
+
+Fish:
+
+```fish
+set -x MODEL_BACKEND_CLASS "examples.custom_backend:CustomModelBackend"
+set -x MODEL_ID "my-model"
+set -x MODEL_MAX_CONCURRENCY "2"
+uv run openai-compatible-server
+```
+
+Windows Command Prompt:
+
+```bat
+set MODEL_BACKEND_CLASS=examples.custom_backend:CustomModelBackend
+set MODEL_ID=my-model
+set MODEL_MAX_CONCURRENCY=2
 uv run openai-compatible-server
 ```
 
