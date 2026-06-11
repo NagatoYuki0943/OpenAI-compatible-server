@@ -210,6 +210,30 @@ These fields are OpenAI-compatible extensions, so other clients may ignore them.
 Declaring a capability does not implement it; the backend must still handle the
 corresponding image, tool, or search workflow.
 
+### Cherry Studio Capability Labels
+
+When this server is configured as a generic OpenAI-compatible provider, Cherry
+Studio commonly infers visual, reasoning, tool-use, and web-search labels from
+the model ID. For example, model IDs containing known DeepSeek or Qwen family
+names may display different capability labels.
+
+The custom `capabilities`, `inputModalities`, `outputModalities`, and
+`reasoning` fields returned by `GET /v1/models` are non-standard extensions.
+Cherry Studio may ignore them for a generic OpenAI-compatible provider, so they
+cannot reliably control the labels shown in its interface.
+
+Available approaches are:
+
+- Use an accurate model ID that Cherry Studio already recognizes.
+- Manually configure the model capabilities in Cherry Studio.
+- Add support for the custom model family to Cherry Studio's capability rules.
+- Use the metadata fields for clients that explicitly support them.
+
+Avoid naming an unrelated model after GPT, Claude, DeepSeek, Qwen, or another
+known family only to display a capability label. Cherry Studio may also use the
+model ID to select parameters, reasoning controls, endpoint behavior, and other
+model-specific compatibility logic.
+
 The package includes a runnable example backend at
 `openai_compatible.backends.custom:CustomModelBackend`. The source-tree alias
 is also available at `examples/custom_backend.py`.
