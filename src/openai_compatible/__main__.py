@@ -6,7 +6,7 @@ from openai_compatible.config import Settings
 
 
 def main() -> None:
-    settings = Settings()
+    settings = Settings.from_env()
     uvicorn.run(
         "openai_compatible.api:create_app",
         host=settings.host,

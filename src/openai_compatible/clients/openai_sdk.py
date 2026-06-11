@@ -1,22 +1,23 @@
 from __future__ import annotations
 
 import argparse
-import os
 from typing import Any
 
 from openai import OpenAI
 
 from openai_compatible.clients.common import build_messages
+from openai_compatible.config import read_configuration
 
 
 def create_parser() -> argparse.ArgumentParser:
+    config = read_configuration()
     parser = argparse.ArgumentParser(description="Call the API using the OpenAI SDK.")
     parser.add_argument(
         "--base-url",
-        default=os.getenv("BASE_URL", "http://127.0.0.1:8000/v1"),
+        default=config.get("BASE_URL", "http://127.0.0.1:8000/v1"),
     )
-    parser.add_argument("--api-key", default=os.getenv("API_KEY", "I AM AN API KEY"))
-    parser.add_argument("--model", default=os.getenv("MODEL_ID", "demo-multimodal-model"))
+    parser.add_argument("--api-key", default=config.get("API_KEY", "I AM AN API KEY"))
+    parser.add_argument("--model", default=config.get("MODEL_ID", "demo-multimodal-model"))
     parser.add_argument("--prompt", default="请描述收到的文本和多媒体输入。")
     parser.add_argument("--image", help="Image URL, data URI, or local path")
     parser.add_argument("--video", help="Video URL, data URI, or local path")

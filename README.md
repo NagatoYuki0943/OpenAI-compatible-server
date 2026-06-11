@@ -8,8 +8,20 @@ pluggable model backends.
 
 ```powershell
 uv sync
+Copy-Item .env.example .env
 uv run openai-compatible-server
 ```
+
+On Bash, Zsh, or Fish:
+
+```bash
+uv sync
+cp .env.example .env
+uv run openai-compatible-server
+```
+
+Edit `.env` before starting the server. The `.env` file is ignored by Git,
+while `.env.example` is committed as the configuration template.
 
 The API is available at `http://127.0.0.1:8000`, with interactive docs at
 `http://127.0.0.1:8000/docs`.
@@ -128,40 +140,31 @@ the Python `bin` or `Scripts` directory is not available in `PATH`:
 python -m openai_compatible
 ```
 
-Configure and start the installed server with Bash or Zsh:
+Create a `.env` file in the directory where the server will be started:
+
+```dotenv
+HOST=0.0.0.0
+PORT=8000
+MODEL_ID=my-model
+MODEL_BACKEND_CLASS=openai_compatible.backends.custom:CustomModelBackend
+MODEL_MAX_CONCURRENCY=2
+```
+
+Then start it normally:
 
 ```bash
-export HOST="0.0.0.0"
-export PORT="8000"
-export MODEL_ID="my-model"
 python -m openai_compatible
 ```
 
-Fish:
-
-```fish
-set -x HOST "0.0.0.0"
-set -x PORT "8000"
-set -x MODEL_ID "my-model"
-python -m openai_compatible
-```
-
-PowerShell:
+To keep configuration elsewhere, set only `ENV_FILE` before startup:
 
 ```powershell
-$env:HOST = "0.0.0.0"
-$env:PORT = "8000"
-$env:MODEL_ID = "my-model"
-python -m openai_compatible
+$env:ENV_FILE = "C:\config\openai-compatible.env"
+openai-compatible-server
 ```
 
-Windows Command Prompt:
-
-```bat
-set HOST=0.0.0.0
-set PORT=8000
-set MODEL_ID=my-model
-python -m openai_compatible
+```bash
+ENV_FILE=/etc/openai-compatible/server.env openai-compatible-server
 ```
 
 ## Custom Model
@@ -240,79 +243,53 @@ is also available at `examples/custom_backend.py`.
 
 Configure the packaged example:
 
-PowerShell:
-
-```powershell
-$env:MODEL_BACKEND_CLASS = "openai_compatible.backends.custom:CustomModelBackend"
-$env:MODEL_ID = "my-model"
-$env:MODEL_MAX_CONCURRENCY = "2"
-uv run openai-compatible-server
+```dotenv
+MODEL_BACKEND_CLASS=openai_compatible.backends.custom:CustomModelBackend
+MODEL_ID=my-model
+MODEL_MAX_CONCURRENCY=2
 ```
 
-Bash or Zsh:
+Start the server after saving `.env`:
 
 ```bash
-export MODEL_BACKEND_CLASS="openai_compatible.backends.custom:CustomModelBackend"
-export MODEL_ID="my-model"
-export MODEL_MAX_CONCURRENCY="2"
-uv run openai-compatible-server
-```
-
-Fish:
-
-```fish
-set -x MODEL_BACKEND_CLASS "openai_compatible.backends.custom:CustomModelBackend"
-set -x MODEL_ID "my-model"
-set -x MODEL_MAX_CONCURRENCY "2"
-uv run openai-compatible-server
-```
-
-Windows Command Prompt:
-
-```bat
-set MODEL_BACKEND_CLASS=openai_compatible.backends.custom:CustomModelBackend
-set MODEL_ID=my-model
-set MODEL_MAX_CONCURRENCY=2
 uv run openai-compatible-server
 ```
 
 You can also load your own backend directly from a Python file without making
 it an installed package.
 
-PowerShell:
-
-```powershell
-$env:MODEL_BACKEND_CLASS = ".\my_backend.py:MyModelBackend"
-uv run openai-compatible-server
+```dotenv
+MODEL_BACKEND_CLASS=./my_backend.py:MyModelBackend
+MODEL_ID=my-model
 ```
-
-Bash or Zsh:
 
 ```bash
-export MODEL_BACKEND_CLASS="./my_backend.py:MyModelBackend"
-uv run openai-compatible-server
-```
-
-Fish:
-
-```fish
-set -x MODEL_BACKEND_CLASS "./my_backend.py:MyModelBackend"
 uv run openai-compatible-server
 ```
 
 For an installed third-party backend package, use its import path:
 
-```bash
-export MODEL_BACKEND_CLASS="my_model_package.backend:MyModelBackend"
-openai-compatible-server
+```dotenv
+MODEL_BACKEND_CLASS=my_model_package.backend:MyModelBackend
 ```
 
-## Environment
+## Configuration
+
+Configuration is loaded from `.env` with `python-dotenv`. The priority order is:
+
+1. Explicit values passed directly by application code.
+2. System environment variables, useful for containers and CI.
+3. Values in `.env`.
+4. Built-in defaults.
+
+Client command-line arguments take priority over their `.env` defaults.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
+| `ENV_FILE` | `.env` | Optional path to another dotenv file |
 | `HOST` | `0.0.0.0` | Server bind address |
 | `PORT` | `8000` | Server port |
+| `RELOAD` | `false` | Enable Uvicorn development reload |
 | `API_KEY` | unset | Optional Bearer authentication |
 | `MODEL_ID` | `demo-multimodal-model` | Advertised model ID |
 | `MODEL_BACKEND_CLASS` | unset | Backend as `module:ClassName` or `file.py:ClassName` |
@@ -322,6 +299,8 @@ openai-compatible-server
 | `LOG_LEVEL` | `INFO` | Log level |
 | `LOG_ROTATION` | `00:00` | Loguru rotation policy |
 | `LOG_RETENTION` | `14 days` | Log retention policy |
+| `CHAT_URL` | local chat endpoint | Generic HTTP client endpoint |
+| `BASE_URL` | `http://127.0.0.1:8000/v1` | OpenAI SDK client base URL |
 
 Video input uses the compatibility extensions `video_url` and `input_video`.
 OpenAI Chat Completions does not define a standard video content part.

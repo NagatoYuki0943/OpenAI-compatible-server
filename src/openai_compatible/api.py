@@ -23,7 +23,7 @@ def create_app(
     settings: Settings | None = None,
     backend: BaseModelBackend | None = None,
 ) -> FastAPI:
-    settings = settings or Settings()
+    settings = settings or Settings.from_env()
     configure_logging(settings)
     backend = backend or create_model_backend(settings)
     service = CompletionService(backend)
@@ -31,7 +31,8 @@ def create_app(
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         logger.info(
-            "Server starting | log_dir={} | level={} | rotation={} | retention={}",
+            "Server starting | env_file={} | log_dir={} | level={} | rotation={} | retention={}",
+            settings.env_file,
             settings.log_dir,
             settings.log_level,
             settings.log_rotation,

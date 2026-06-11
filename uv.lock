@@ -779,6 +779,7 @@ dependencies = [
     { name = "loguru" },
     { name = "openai" },
     { name = "pydantic" },
+    { name = "python-dotenv" },
     { name = "requests" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -798,6 +799,7 @@ requires-dist = [
     { name = "loguru", specifier = ">=0.7" },
     { name = "openai", specifier = ">=1.60" },
     { name = "pydantic", specifier = ">=2.10" },
+    { name = "python-dotenv", specifier = ">=1.0" },
     { name = "requests", specifier = ">=2.32" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.34" },
 ]

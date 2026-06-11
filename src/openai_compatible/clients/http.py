@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-import os
 from collections.abc import AsyncIterator, Iterable, Iterator
 from typing import Any
 
@@ -12,6 +11,7 @@ import httpx
 import requests
 
 from openai_compatible.clients.common import build_request
+from openai_compatible.config import read_configuration
 
 
 def iter_sse_lines(lines: Iterable[str]) -> Iterator[dict[str, Any]]:
@@ -134,6 +134,7 @@ async def _run_async(
 
 
 def create_parser() -> argparse.ArgumentParser:
+    config = read_configuration()
     parser = argparse.ArgumentParser(description="Call the API using a generic HTTP client.")
     parser.add_argument(
         "--client",
@@ -143,10 +144,10 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--url",
-        default=os.getenv("CHAT_URL", "http://127.0.0.1:8000/v1/chat/completions"),
+        default=config.get("CHAT_URL", "http://127.0.0.1:8000/v1/chat/completions"),
     )
-    parser.add_argument("--api-key", default=os.getenv("API_KEY", "I AM AN API KEY"))
-    parser.add_argument("--model", default=os.getenv("MODEL_ID", "demo-multimodal-model"))
+    parser.add_argument("--api-key", default=config.get("API_KEY", "I AM AN API KEY"))
+    parser.add_argument("--model", default=config.get("MODEL_ID", "demo-multimodal-model"))
     parser.add_argument("--prompt", default="请描述收到的文本和多媒体输入。")
     parser.add_argument("--image", help="Image URL, data URI, or local path")
     parser.add_argument("--video", help="Video URL, data URI, or local path")
