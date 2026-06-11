@@ -52,6 +52,59 @@ Install the generated package:
 uv pip install dist/openai_compatible_server-0.1.0-py3-none-any.whl
 ```
 
+## Run Without uv
+
+After building the wheel, it can be installed and run with standard Python
+tools. `uv` is not required on the target computer:
+
+```bash
+python -m pip install dist/openai_compatible_server-0.1.0-py3-none-any.whl
+openai-compatible-server
+```
+
+You can also start the server through its Python module. This is useful when
+the Python `bin` or `Scripts` directory is not available in `PATH`:
+
+```bash
+python -m openai_compatible
+```
+
+Configure and start the installed server with Bash or Zsh:
+
+```bash
+export HOST="0.0.0.0"
+export PORT="8000"
+export MODEL_ID="my-model"
+python -m openai_compatible
+```
+
+Fish:
+
+```fish
+set -x HOST "0.0.0.0"
+set -x PORT "8000"
+set -x MODEL_ID "my-model"
+python -m openai_compatible
+```
+
+PowerShell:
+
+```powershell
+$env:HOST = "0.0.0.0"
+$env:PORT = "8000"
+$env:MODEL_ID = "my-model"
+python -m openai_compatible
+```
+
+Windows Command Prompt:
+
+```bat
+set HOST=0.0.0.0
+set PORT=8000
+set MODEL_ID=my-model
+python -m openai_compatible
+```
+
 ## Custom Model
 
 Subclass `BaseModelBackend` and implement `load_model()` and `infer()`. The
