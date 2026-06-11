@@ -18,7 +18,7 @@ dependencies = [
 [project.scripts]
 openai-compatible-server = "openai_compatible.__main__:main"
 openai-compatible-http-client = "openai_compatible.clients.http:main"
-openai-compatible-sdk-client = "openai_compatible.clients.openai_sdk:main"
+openai-compatible-openai-sdk-client = "openai_compatible.clients.openai_sdk:main"
 openai-compatible-build-wheel = "openai_compatible.build:main"
 
 [dependency-groups]

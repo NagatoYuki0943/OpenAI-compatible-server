@@ -16,10 +16,69 @@ The API is available at `http://127.0.0.1:8000`, with interactive docs at
 
 ## Commands
 
+Start the server:
+
 ```powershell
 uv run openai-compatible-server
-uv run openai-compatible-http-client --stream
-uv run openai-compatible-sdk-client --stream
+```
+
+Call it with a generic HTTP client:
+
+```powershell
+uv run openai-compatible-http-client `
+  --client httpx-async `
+  --url http://127.0.0.1:8000/v1/chat/completions `
+  --model demo-multimodal-model `
+  --prompt "Describe the input." `
+  --stream
+```
+
+Call it with the OpenAI SDK:
+
+```powershell
+uv run openai-compatible-openai-sdk-client `
+  --base-url http://127.0.0.1:8000/v1 `
+  --model demo-multimodal-model `
+  --prompt "Describe the input." `
+  --stream
+```
+
+Both clients support common generation and multimodal options:
+
+```powershell
+uv run openai-compatible-openai-sdk-client `
+  --api-key "your-api-key" `
+  --model "my-model" `
+  --prompt "What is in this image?" `
+  --image ".\example.png" `
+  --video "https://example.com/example.mp4" `
+  --timeout 120 `
+  --max-tokens 512 `
+  --temperature 0.7 `
+  --top-p 0.9 `
+  --top-k 40 `
+  --min-p 0.05 `
+  --repetition-penalty 1.05 `
+  --frequency-penalty 0.0 `
+  --presence-penalty 0.0 `
+  --min-tokens 1 `
+  --thinking-token-budget 256 `
+  --reasoning-effort medium `
+  --seed 42 `
+  -n 1 `
+  --stream
+```
+
+Show all client options:
+
+```powershell
+uv run openai-compatible-http-client --help
+uv run openai-compatible-openai-sdk-client --help
+```
+
+Development and packaging commands:
+
+```powershell
 uv run openai-compatible-build-wheel
 uv run pytest
 uv run ruff check .

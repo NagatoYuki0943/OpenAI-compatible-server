@@ -22,8 +22,9 @@ def resolve_media_url(value: str) -> str:
 def build_messages(
     image: str | None = None,
     video: str | None = None,
+    prompt: str = "请描述收到的文本和多媒体输入。",
 ) -> list[dict[str, Any]]:
-    content: list[dict[str, Any]] = [{"type": "text", "text": "请描述收到的文本和多媒体输入。"}]
+    content: list[dict[str, Any]] = [{"type": "text", "text": prompt}]
     if image:
         content.append(
             {
@@ -50,22 +51,37 @@ def build_request(
     image: str | None = None,
     video: str | None = None,
     stream: bool = False,
+    prompt: str = "请描述收到的文本和多媒体输入。",
+    max_tokens: int = 512,
+    temperature: float = 0.7,
+    top_p: float = 0.9,
+    top_k: int = 40,
+    min_p: float = 0.05,
+    repetition_penalty: float = 1.05,
+    frequency_penalty: float = 0.0,
+    presence_penalty: float = 0.0,
+    min_tokens: int = 1,
+    thinking_token_budget: int = 256,
+    reasoning_effort: str = "medium",
+    seed: int | None = 42,
+    n: int = 1,
 ) -> dict[str, Any]:
     return {
         "model": model,
-        "messages": build_messages(image, video),
-        "max_completion_tokens": 512,
-        "temperature": 0.7,
-        "top_p": 0.9,
-        "top_k": 40,
-        "min_p": 0.05,
-        "repetition_penalty": 1.05,
-        "frequency_penalty": 0.0,
-        "presence_penalty": 0.0,
-        "seed": 42,
-        "min_tokens": 1,
-        "thinking_token_budget": 256,
-        "reasoning_effort": "medium",
+        "messages": build_messages(image, video, prompt),
+        "max_completion_tokens": max_tokens,
+        "temperature": temperature,
+        "top_p": top_p,
+        "top_k": top_k,
+        "min_p": min_p,
+        "repetition_penalty": repetition_penalty,
+        "frequency_penalty": frequency_penalty,
+        "presence_penalty": presence_penalty,
+        "seed": seed,
+        "n": n,
+        "min_tokens": min_tokens,
+        "thinking_token_budget": thinking_token_budget,
+        "reasoning_effort": reasoning_effort,
         "stream": stream,
         "stream_options": {"include_usage": True} if stream else None,
     }
