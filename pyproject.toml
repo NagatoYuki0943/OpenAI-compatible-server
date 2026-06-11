@@ -19,6 +19,7 @@ dependencies = [
 openai-compatible-server = "openai_compatible.__main__:main"
 openai-compatible-http-client = "openai_compatible.clients.http:main"
 openai-compatible-sdk-client = "openai_compatible.clients.openai_sdk:main"
+openai-compatible-build-wheel = "openai_compatible.build:main"
 
 [dependency-groups]
 dev = [
@@ -45,4 +46,3 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
-

@@ -20,8 +20,36 @@ The API is available at `http://127.0.0.1:8000`, with interactive docs at
 uv run openai-compatible-server
 uv run openai-compatible-http-client --stream
 uv run openai-compatible-sdk-client --stream
+uv run openai-compatible-build-wheel
 uv run pytest
 uv run ruff check .
+```
+
+## Build Wheel
+
+Build a clean wheel into `dist/`:
+
+```powershell
+uv run openai-compatible-build-wheel
+```
+
+Use another output directory or preserve existing wheels:
+
+```powershell
+uv run openai-compatible-build-wheel --out-dir artifacts
+uv run openai-compatible-build-wheel --no-clean
+```
+
+The equivalent native uv command is:
+
+```powershell
+uv build --wheel
+```
+
+Install the generated package:
+
+```powershell
+uv pip install dist/openai_compatible_server-0.1.0-py3-none-any.whl
 ```
 
 ## Custom Model
