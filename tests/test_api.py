@@ -70,6 +70,11 @@ def test_non_streaming_multimodal_completion(settings, backend) -> None:
     assert body["choices"][0]["message"]["reasoning_content"] == "reason-0"
     assert body["usage"]["completion_tokens"] == 12
     assert backend.requests[0].sampling_params["top_k"] == 7
+    assert backend.requests[0].sampling_params["temperature"] == 0.8
+    assert backend.requests[0].sampling_params["max_tokens"] == 256
+    assert backend.requests[0].sampling_params["repetition_penalty"] == 1.0
+    assert backend.requests[0].sampling_params["min_tokens"] == 2
+    assert backend.requests[0].sampling_params["stop_token_ids"] == [99]
     assert backend.requests[0].request_id == "chat-id"
 
 

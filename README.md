@@ -8,7 +8,7 @@ pluggable model backends.
 
 ```powershell
 uv sync
-Copy-Item .env.example .env
+uv run openai-compatible-init-env
 uv run openai-compatible-server
 ```
 
@@ -16,12 +16,13 @@ On Bash, Zsh, or Fish:
 
 ```bash
 uv sync
-cp .env.example .env
+uv run openai-compatible-init-env
 uv run openai-compatible-server
 ```
 
 Edit `.env` before starting the server. The `.env` file is ignored by Git,
-while `.env.example` is committed as the configuration template.
+while `.env.example` is committed as the configuration template. The init
+command refuses to overwrite an existing `.env`; pass `--force` to replace it.
 
 The API is available at `http://127.0.0.1:8000`, with interactive docs at
 `http://127.0.0.1:8000/docs`.
@@ -32,6 +33,18 @@ Start the server:
 
 ```powershell
 uv run openai-compatible-server
+```
+
+Create `.env` in the current directory:
+
+```powershell
+uv run openai-compatible-init-env
+```
+
+Create an editable custom model backend in the current directory:
+
+```powershell
+uv run openai-compatible-init-backend
 ```
 
 Call it with a generic HTTP client:
@@ -130,6 +143,8 @@ tools. `uv` is not required on the target computer:
 
 ```bash
 python -m pip install dist/openai_compatible_server-0.1.0-py3-none-any.whl
+openai-compatible-init-env
+openai-compatible-init-backend
 openai-compatible-server
 ```
 
@@ -140,21 +155,40 @@ the Python `bin` or `Scripts` directory is not available in `PATH`:
 python -m openai_compatible
 ```
 
-Create a `.env` file in the directory where the server will be started:
-
-```dotenv
-HOST=0.0.0.0
-PORT=8000
-MODEL_ID=my-model
-MODEL_BACKEND_CLASS=openai_compatible.backends.custom:CustomModelBackend
-MODEL_MAX_CONCURRENCY=2
-```
-
-Then start it normally:
+Run `openai-compatible-init-env` from any directory to create `.env` there. The
+server reads `.env` from its startup directory, so initialize and start it from
+the same directory:
 
 ```bash
-python -m openai_compatible
+mkdir my-openai-server
+cd my-openai-server
+openai-compatible-init-env
+openai-compatible-server
 ```
+
+Use `--force` to overwrite an existing file. `--output` can select another
+filename, but the server then needs `ENV_FILE` to point to it:
+
+```bash
+openai-compatible-init-env --force
+openai-compatible-init-env --output server.env
+ENV_FILE=server.env openai-compatible-server
+```
+
+Create a custom backend template and select it in `.env`:
+
+```bash
+openai-compatible-init-backend
+```
+
+```dotenv
+MODEL_ID=my-model
+MODEL_BACKEND_CLASS=./custom_backend.py:CustomModelBackend
+```
+
+The command refuses to overwrite an existing `custom_backend.py`. Use
+`openai-compatible-init-backend --force` to replace it, or `--output` to choose
+another Python filename.
 
 To keep configuration elsewhere, set only `ENV_FILE` before startup:
 
@@ -173,6 +207,12 @@ Subclass `BaseModelBackend` and implement `load_model()` and `infer()`. The
 default `stream_generate()` converts complete results to SSE chunks; override it
 when the model supports native token streaming.
 
+Generate a ready-to-edit implementation in the current directory:
+
+```bash
+openai-compatible-init-backend
+```
+
 Custom backends can also declare metadata returned by `GET /v1/models`:
 
 ```python
@@ -184,6 +224,23 @@ from openai_compatible.backends import (
 
 
 class MyModelBackend(BaseModelBackend):
+    generation_defaults = {
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "top_k": 40,
+        "min_p": 0.05,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0,
+        "repetition_penalty": 1.0,
+        "min_tokens": 0,
+        "stop_token_ids": [],
+        "bad_words": [],
+        "include_stop_str_in_output": False,
+        "ignore_eos": False,
+        "skip_special_tokens": True,
+        "spaces_between_special_tokens": True,
+    }
     model_metadata = ModelMetadata(
         name="My Model",
         capabilities=(
@@ -205,6 +262,17 @@ class MyModelBackend(BaseModelBackend):
         max_output_tokens=4096,
     )
 ```
+
+`generation_defaults` contains defaults owned by that model. Parameters
+explicitly supplied in a chat completion request override these values. Keep
+deployment settings such as model paths, ports, and concurrency in `.env`;
+keep model sampling behavior in the backend.
+
+Other optional model-specific defaults include `seed`, `stop`, `bad_words`,
+`allowed_token_ids`, `thinking_token_budget`, `prompt_logprobs`, and
+`logit_bias`. Only configure parameters supported by the underlying inference
+engine. Keep `n`, `logprobs`, and `structured_outputs` request-controlled
+unless the backend has a specific reason to enforce them.
 
 Supported Cherry Studio-compatible capability values include
 `reasoning`, `image-recognition`, `audio-recognition`, `video-recognition`,

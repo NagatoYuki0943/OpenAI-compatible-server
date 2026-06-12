@@ -21,6 +21,8 @@ openai-compatible-server = "openai_compatible.__main__:main"
 openai-compatible-http-client = "openai_compatible.clients.http:main"
 openai-compatible-openai-sdk-client = "openai_compatible.clients.openai_sdk:main"
 openai-compatible-build-wheel = "openai_compatible.build:main"
+openai-compatible-init-env = "openai_compatible.init_env:main"
+openai-compatible-init-backend = "openai_compatible.init_backend:main"
 
 [dependency-groups]
 dev = [

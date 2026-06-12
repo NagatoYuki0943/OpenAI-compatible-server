@@ -15,6 +15,23 @@ from openai_compatible.config import Settings
 
 
 class StubBackend(BaseModelBackend):
+    generation_defaults = {
+        "max_tokens": 256,
+        "temperature": 0.8,
+        "top_p": 0.9,
+        "top_k": 40,
+        "min_p": 0.05,
+        "frequency_penalty": 0.1,
+        "presence_penalty": 0.2,
+        "repetition_penalty": 1.0,
+        "min_tokens": 2,
+        "stop_token_ids": [99],
+        "bad_words": ["blocked"],
+        "include_stop_str_in_output": True,
+        "ignore_eos": True,
+        "skip_special_tokens": False,
+        "spaces_between_special_tokens": False,
+    }
     model_metadata = ModelMetadata(
         name="Test Model",
         capabilities=("reasoning", "image-recognition", "function-call"),

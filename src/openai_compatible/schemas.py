@@ -114,10 +114,10 @@ class ChatRequest(OpenAIModel):
     max_tokens: int | None = Field(default=None, ge=1)
     max_completion_tokens: int | None = Field(default=None, ge=1)
     n: int = Field(default=1, ge=1, le=128)
-    temperature: float = Field(default=1.0, ge=0.0)
-    top_p: float = Field(default=1.0, gt=0.0, le=1.0)
-    frequency_penalty: float = Field(default=0.0, ge=-2.0, le=2.0)
-    presence_penalty: float = Field(default=0.0, ge=-2.0, le=2.0)
+    temperature: float | None = Field(default=None, ge=0.0)
+    top_p: float | None = Field(default=None, gt=0.0, le=1.0)
+    frequency_penalty: float | None = Field(default=None, ge=-2.0, le=2.0)
+    presence_penalty: float | None = Field(default=None, ge=-2.0, le=2.0)
     seed: int | None = None
     stop: str | list[str] | None = None
     stream: bool = False
@@ -136,17 +136,17 @@ class ChatRequest(OpenAIModel):
     user: str | None = None
     service_tier: str | None = None
 
-    top_k: int = Field(default=0, ge=-1)
-    min_p: float = Field(default=0.0, ge=0.0, le=1.0)
-    repetition_penalty: float = Field(default=1.0, gt=0.0)
-    min_tokens: int = Field(default=0, ge=0)
+    top_k: int | None = Field(default=None, ge=-1)
+    min_p: float | None = Field(default=None, ge=0.0, le=1.0)
+    repetition_penalty: float | None = Field(default=None, gt=0.0)
+    min_tokens: int | None = Field(default=None, ge=0)
     stop_token_ids: list[int] | None = None
     bad_words: list[str] | None = None
     allowed_token_ids: list[int] | None = Field(default=None, min_length=1)
-    include_stop_str_in_output: bool = False
-    ignore_eos: bool = False
-    skip_special_tokens: bool = True
-    spaces_between_special_tokens: bool = True
+    include_stop_str_in_output: bool | None = None
+    ignore_eos: bool | None = None
+    skip_special_tokens: bool | None = None
+    spaces_between_special_tokens: bool | None = None
     prompt_logprobs: int | None = Field(default=None, ge=-1)
     thinking_token_budget: int | None = Field(default=None, ge=0)
     structured_outputs: dict[str, Any] | None = None
@@ -160,7 +160,7 @@ class ChatRequest(OpenAIModel):
         if self.modalities and "audio" in self.modalities and self.audio is None:
             raise ValueError("audio output parameters are required for audio modality")
         max_output = self.max_completion_tokens or self.max_tokens
-        if max_output is not None and self.min_tokens > max_output:
+        if max_output is not None and self.min_tokens is not None and self.min_tokens > max_output:
             raise ValueError("min_tokens cannot exceed the maximum output token count")
         return self
 
@@ -191,6 +191,8 @@ class ChatRequest(OpenAIModel):
             "structured_outputs",
         }
         data = self.model_dump()
-        result = {name: data[name] for name in names if data.get(name) is not None}
-        result["max_tokens"] = self.max_completion_tokens or self.max_tokens
+        result = {name: data[name] for name in names if data[name] is not None}
+        max_tokens = self.max_completion_tokens or self.max_tokens
+        if max_tokens is not None:
+            result["max_tokens"] = max_tokens
         return result

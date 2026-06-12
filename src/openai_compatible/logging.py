@@ -25,7 +25,7 @@ def configure_logging(settings: Settings) -> None:
         diagnose=False,
     )
     logger.add(
-        settings.log_dir / "openai_server_{time:YYYY-MM-DD}.log",
+        settings.log_dir / "openai_server_{time:YYYY-MM-DD_HH-mm-ss}.log",
         level=settings.log_level,
         rotation=settings.log_rotation,
         retention=settings.log_retention,

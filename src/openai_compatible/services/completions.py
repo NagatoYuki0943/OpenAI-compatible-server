@@ -23,7 +23,10 @@ class CompletionService:
 
     async def complete(self, request: ChatRequest, request_id: str | None = None) -> dict[str, Any]:
         completion_id = f"chatcmpl-{uuid.uuid4().hex}"
-        results = await self.backend.generate(_backend_request(request, request_id))
+        backend_request = self.backend.with_generation_defaults(
+            _backend_request(request, request_id)
+        )
+        results = await self.backend.generate(backend_request)
         choices = []
         for index, result in enumerate(results):
             message: dict[str, Any] = {
@@ -94,7 +97,10 @@ class CompletionService:
                     }
                 )
 
-            async for chunk in self.backend.stream_generate(_backend_request(request, request_id)):
+            backend_request = self.backend.with_generation_defaults(
+                _backend_request(request, request_id)
+            )
+            async for chunk in self.backend.stream_generate(backend_request):
                 if not 0 <= chunk.index < request.n:
                     raise RuntimeError(f"Backend returned invalid choice index {chunk.index}")
                 delta: dict[str, Any] = dict(chunk.extra)

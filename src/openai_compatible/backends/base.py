@@ -3,9 +3,9 @@ from __future__ import annotations
 import asyncio
 import time
 from abc import ABC, abstractmethod
-from collections.abc import AsyncIterator
-from dataclasses import dataclass, field
-from typing import Any, Literal
+from collections.abc import AsyncIterator, Mapping
+from dataclasses import dataclass, field, replace
+from typing import Any, ClassVar, Literal
 
 from loguru import logger
 
@@ -144,6 +144,7 @@ class GenerationChunk:
 
 class BaseModelBackend(ABC):
     model_metadata: ModelMetadata | None = None
+    generation_defaults: ClassVar[Mapping[str, Any]] = {}
 
     def __init__(
         self,
@@ -219,6 +220,7 @@ class BaseModelBackend(ABC):
 
     async def generate(self, request: GenerationRequest) -> list[GenerationResult]:
         self._ensure_loaded()
+        request = self.with_generation_defaults(request)
         started_at = time.perf_counter()
         logger.info(
             "Inference started | backend={} | model={} | choices={} | messages={}",
@@ -249,6 +251,18 @@ class BaseModelBackend(ABC):
             (time.perf_counter() - started_at) * 1000,
         )
         return results
+
+    def with_generation_defaults(self, request: GenerationRequest) -> GenerationRequest:
+        """Return a request with model defaults overridden by explicit client parameters."""
+        sampling_params = {
+            **self.generation_defaults,
+            **request.sampling_params,
+        }
+        min_tokens = sampling_params.get("min_tokens")
+        max_tokens = sampling_params.get("max_tokens")
+        if min_tokens is not None and max_tokens is not None and min_tokens > max_tokens:
+            raise ValueError("min_tokens cannot exceed the maximum output token count")
+        return replace(request, sampling_params=sampling_params)
 
     async def stream_generate(self, request: GenerationRequest) -> AsyncIterator[GenerationChunk]:
         results = await self.generate(request)

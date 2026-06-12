@@ -12,6 +12,23 @@ from openai_compatible.backends.base import (
 
 
 class DemoModelBackend(BaseModelBackend):
+    generation_defaults = {
+        "max_tokens": 512,
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "top_k": 0,
+        "min_p": 0.0,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0,
+        "repetition_penalty": 1.0,
+        "min_tokens": 0,
+        "stop_token_ids": [],
+        "bad_words": [],
+        "include_stop_str_in_output": False,
+        "ignore_eos": False,
+        "skip_special_tokens": True,
+        "spaces_between_special_tokens": True,
+    }
     model_metadata = ModelMetadata(
         name="Demo Multimodal Model",
         description="Demonstration backend for the OpenAI-compatible server.",

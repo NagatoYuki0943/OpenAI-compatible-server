@@ -12,6 +12,23 @@ from openai_compatible.backends.base import (
 
 
 class CustomModelBackend(BaseModelBackend):
+    generation_defaults = {
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "top_k": 40,
+        "min_p": 0.05,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0,
+        "repetition_penalty": 1.0,
+        "min_tokens": 0,
+        "stop_token_ids": [],
+        "bad_words": [],
+        "include_stop_str_in_output": False,
+        "ignore_eos": False,
+        "skip_special_tokens": True,
+        "spaces_between_special_tokens": True,
+    }
     model_metadata = ModelMetadata(
         name="My Custom Model",
         description="Example custom multimodal reasoning model.",
