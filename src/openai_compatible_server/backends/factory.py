@@ -59,11 +59,18 @@ def _load_backend_module(module_or_path: str) -> ModuleType:
             raise ImportError(f"Could not load model backend file: {path}")
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
+        backend_dir = str(path.parent)
+        sys_path_inserted = backend_dir not in sys.path
+        if sys_path_inserted:
+            sys.path.insert(0, backend_dir)
         try:
             spec.loader.exec_module(module)
         except Exception:
             sys.modules.pop(module_name, None)
             raise
+        finally:
+            if sys_path_inserted:
+                sys.path.remove(backend_dir)
         return module
 
     try:

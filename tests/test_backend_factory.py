@@ -59,6 +59,37 @@ def test_factory_loads_backend_from_python_file(tmp_path: Path) -> None:
     assert backend.model_id == "factory-test-model"
 
 
+def test_factory_loads_sibling_modules_for_backend_file(tmp_path: Path) -> None:
+    (tmp_path / "modeling_qwen3vl.py").write_text(
+        "MODEL_NAME = 'qwen3vl-sibling'\n",
+        encoding="utf-8",
+    )
+    backend_file = tmp_path / "qwen3vl_backend.py"
+    backend_file.write_text(
+        "\n".join(
+            [
+                "from typing import Any",
+                "from modeling_qwen3vl import MODEL_NAME",
+                "from openai_compatible_server.backends import (",
+                "    BaseModelBackend, OCSGenerationRequest, OCSGenerationResult",
+                ")",
+                "",
+                "class Qwen3VLBackend(BaseModelBackend):",
+                "    def load_model(self) -> Any:",
+                "        return {'ready': True}",
+                "",
+                "    def generate(self, request: OCSGenerationRequest):",
+                "        return [OCSGenerationResult(content=MODEL_NAME)]",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    backend = create_model_backend(_settings(tmp_path, f"{backend_file}:Qwen3VLBackend"))
+
+    assert type(backend).__name__ == "Qwen3VLBackend"
+
+
 def test_factory_error_explains_supported_backend_paths(tmp_path: Path) -> None:
     with pytest.raises(ModuleNotFoundError, match=r"\.py file path"):
         create_model_backend(_settings(tmp_path, "missing_package.backend:Backend"))
