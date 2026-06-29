@@ -173,6 +173,11 @@ def create_app(
             chat_request.top_k,
         )
         logger.debug("Sampling parameters | params={}", chat_request.sampling_params())
+        logger.info(
+            "Chat payload | messages={} | sampling_params={}",
+            [message.model_dump(exclude_none=True) for message in chat_request.messages],
+            chat_request.sampling_params(),
+        )
         request_id = request.state.request_id
         if chat_request.stream:
             return StreamingResponse(

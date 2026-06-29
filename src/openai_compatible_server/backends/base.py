@@ -231,6 +231,15 @@ class BaseModelBackend(ABC):
             request.n,
             len(request.messages),
         )
+        logger.info(
+            "Inference request payload | backend={} | model={} | messages={} "
+            "| sampling_params={} | metadata={}",
+            type(self).__name__,
+            request.model,
+            request.messages,
+            request.sampling_params,
+            request.metadata,
+        )
         try:
             async with self._inference_semaphore:
                 results = await asyncio.to_thread(self.generate, request)
@@ -251,6 +260,12 @@ class BaseModelBackend(ABC):
             request.model,
             len(results),
             (time.perf_counter() - started_at) * 1000,
+        )
+        logger.info(
+            "Inference results payload | backend={} | model={} | results={}",
+            type(self).__name__,
+            request.model,
+            [_result_log(result) for result in results],
         )
         return results
 
@@ -335,3 +350,17 @@ class BaseModelBackend(ABC):
     def _ensure_loaded(self) -> None:
         if not self._loaded:
             raise RuntimeError("Model backend is not loaded")
+
+
+def _result_log(result: OCSGenerationResult) -> dict[str, Any]:
+    return {
+        "content": result.content,
+        "reasoning_content": result.reasoning_content,
+        "finish_reason": result.finish_reason,
+        "tool_calls": result.tool_calls,
+        "logprobs": result.logprobs,
+        "prompt_tokens": result.prompt_tokens,
+        "completion_tokens": result.completion_tokens,
+        "reasoning_tokens": result.reasoning_tokens,
+        "extra": result.extra,
+    }

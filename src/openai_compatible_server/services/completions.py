@@ -26,7 +26,22 @@ class CompletionService:
         backend_request = self.backend.with_generation_defaults(
             _backend_request(request, request_id)
         )
+        logger.info(
+            "Backend request prepared | completion_id={} | model={} | messages={} "
+            "| sampling_params={} | n={} | metadata={}",
+            completion_id,
+            backend_request.model,
+            backend_request.messages,
+            backend_request.sampling_params,
+            backend_request.n,
+            backend_request.metadata,
+        )
         results = await self.backend.infer(backend_request)
+        logger.info(
+            "Backend results received | completion_id={} | results={}",
+            completion_id,
+            [_result_log(result) for result in results],
+        )
         choices = []
         for index, result in enumerate(results):
             message: dict[str, Any] = {
@@ -102,6 +117,16 @@ class CompletionService:
             backend_request = self.backend.with_generation_defaults(
                 _backend_request(request, request_id)
             )
+            logger.info(
+                "Backend stream request prepared | completion_id={} | model={} | messages={} "
+                "| sampling_params={} | n={} | metadata={}",
+                completion_id,
+                backend_request.model,
+                backend_request.messages,
+                backend_request.sampling_params,
+                backend_request.n,
+                backend_request.metadata,
+            )
             async for chunk in self.backend.stream_generate(backend_request):
                 if not 0 <= chunk.index < request.n:
                     raise RuntimeError(f"Backend returned invalid choice index {chunk.index}")
@@ -136,6 +161,17 @@ class CompletionService:
                     }
                 )
 
+            logger.info(
+                "Backend stream results received | completion_id={} | outputs={} "
+                "| reasoning_outputs={} | prompt_tokens={} | completion_tokens={} "
+                "| reasoning_tokens={}",
+                completion_id,
+                outputs,
+                reasoning_outputs,
+                backend_prompt_tokens,
+                backend_completion_tokens,
+                backend_reasoning_tokens,
+            )
             for index, is_finished in enumerate(finished):
                 if not is_finished:
                     yield _sse(
@@ -246,6 +282,20 @@ def _usage_for(request: ChatRequest, results: list[OCSGenerationResult]) -> dict
         "completion_tokens": completion_tokens,
         "total_tokens": prompt_tokens + completion_tokens,
         "completion_tokens_details": {"reasoning_tokens": reasoning_tokens},
+    }
+
+
+def _result_log(result: OCSGenerationResult) -> dict[str, Any]:
+    return {
+        "content": result.content,
+        "reasoning_content": result.reasoning_content,
+        "finish_reason": result.finish_reason,
+        "tool_calls": result.tool_calls,
+        "logprobs": result.logprobs,
+        "prompt_tokens": result.prompt_tokens,
+        "completion_tokens": result.completion_tokens,
+        "reasoning_tokens": result.reasoning_tokens,
+        "extra": result.extra,
     }
 
 
