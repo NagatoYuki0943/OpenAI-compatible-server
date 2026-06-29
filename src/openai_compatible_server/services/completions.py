@@ -80,7 +80,9 @@ class CompletionService:
         outputs = ["" for _ in range(request.n)]
         reasoning_outputs = ["" for _ in range(request.n)]
         finished = [False for _ in range(request.n)]
-        backend_usage: dict[str, Any] | None = None
+        backend_prompt_tokens: int | None = None
+        backend_completion_tokens: int | None = None
+        backend_reasoning_tokens: int | None = None
         try:
             for index in range(request.n):
                 yield _sse(
@@ -114,8 +116,12 @@ class CompletionService:
                     delta["tool_calls"] = chunk.tool_calls
                 if chunk.finish_reason is not None:
                     finished[chunk.index] = True
-                if chunk.usage is not None:
-                    backend_usage = chunk.usage
+                if chunk.prompt_tokens is not None:
+                    backend_prompt_tokens = chunk.prompt_tokens
+                if chunk.completion_tokens is not None:
+                    backend_completion_tokens = chunk.completion_tokens
+                if chunk.reasoning_tokens is not None:
+                    backend_reasoning_tokens = chunk.reasoning_tokens
                 yield _sse(
                     {
                         **common,
@@ -158,7 +164,12 @@ class CompletionService:
                     {
                         **common,
                         "choices": [],
-                        "usage": backend_usage or _usage_for(request, results),
+                        "usage": _chunk_usage(
+                            backend_prompt_tokens,
+                            backend_completion_tokens,
+                            backend_reasoning_tokens,
+                        )
+                        or _usage_for(request, results),
                     }
                 )
             yield _sse("[DONE]")
@@ -230,6 +241,21 @@ def _usage_for(request: ChatRequest, results: list[OCSGenerationResult]) -> dict
         else _estimate_tokens(item.content) + _estimate_tokens(item.reasoning_content or "")
         for item in results
     )
+    return {
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "total_tokens": prompt_tokens + completion_tokens,
+        "completion_tokens_details": {"reasoning_tokens": reasoning_tokens},
+    }
+
+
+def _chunk_usage(
+    prompt_tokens: int | None,
+    completion_tokens: int | None,
+    reasoning_tokens: int | None,
+) -> dict[str, Any] | None:
+    if prompt_tokens is None or completion_tokens is None or reasoning_tokens is None:
+        return None
     return {
         "prompt_tokens": prompt_tokens,
         "completion_tokens": completion_tokens,

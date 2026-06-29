@@ -44,7 +44,9 @@ async def test_generate_and_default_stream_adapter(backend) -> None:
     assert [result.content for result in results] == ["answer-0", "answer-1"]
     assert any(chunk.reasoning_content for chunk in chunks)
     assert any(chunk.finish_reason == "stop" for chunk in chunks)
-    assert chunks[-1].usage["completion_tokens"] == 12
+    assert chunks[-1].prompt_tokens == 3
+    assert chunks[-1].completion_tokens == 12
+    assert chunks[-1].reasoning_tokens == 4
     assert backend.requests[0].sampling_params["temperature"] == 0.8
     assert backend.requests[0].sampling_params["top_k"] == 7
     assert backend.requests[0].sampling_params["repetition_penalty"] == 1.0

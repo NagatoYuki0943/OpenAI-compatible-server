@@ -138,7 +138,9 @@ class OCSGenerationChunk:
     finish_reason: str | None = None
     tool_calls: list[dict[str, Any]] | None = None
     logprobs: Any = None
-    usage: dict[str, Any] | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    reasoning_tokens: int | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -296,25 +298,26 @@ class BaseModelBackend(ABC):
                     index=index,
                     content=result.content[start : start + self.stream_chunk_size],
                 )
-            usage = None
+            chunk_prompt_tokens = None
+            chunk_completion_tokens = None
+            chunk_reasoning_tokens = None
             if (
                 index == len(results) - 1
                 and prompt_tokens is not None
                 and completion_tokens is not None
                 and reasoning_tokens is not None
             ):
-                usage = {
-                    "prompt_tokens": prompt_tokens,
-                    "completion_tokens": completion_tokens,
-                    "total_tokens": prompt_tokens + completion_tokens,
-                    "completion_tokens_details": {"reasoning_tokens": reasoning_tokens},
-                }
+                chunk_prompt_tokens = prompt_tokens
+                chunk_completion_tokens = completion_tokens
+                chunk_reasoning_tokens = reasoning_tokens
             yield OCSGenerationChunk(
                 index=index,
                 finish_reason=result.finish_reason,
                 tool_calls=result.tool_calls,
                 logprobs=result.logprobs,
-                usage=usage,
+                prompt_tokens=chunk_prompt_tokens,
+                completion_tokens=chunk_completion_tokens,
+                reasoning_tokens=chunk_reasoning_tokens,
             )
 
     @abstractmethod
