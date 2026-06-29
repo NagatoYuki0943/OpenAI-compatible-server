@@ -6,10 +6,10 @@ import pytest
 
 from openai_compatible_server.backends import (
     BaseModelBackend,
-    GenerationRequest,
-    GenerationResult,
-    ModelMetadata,
-    ReasoningMetadata,
+    OCSGenerationRequest,
+    OCSGenerationResult,
+    OCSModelMetadata,
+    OCSReasoningMetadata,
 )
 from openai_compatible_server.config import Settings
 
@@ -32,12 +32,12 @@ class StubBackend(BaseModelBackend):
         "skip_special_tokens": False,
         "spaces_between_special_tokens": False,
     }
-    model_metadata = ModelMetadata(
+    model_metadata = OCSModelMetadata(
         name="Test Model",
         capabilities=("reasoning", "image-recognition", "function-call"),
         input_modalities=("text", "image"),
         output_modalities=("text",),
-        reasoning=ReasoningMetadata(
+        reasoning=OCSReasoningMetadata(
             supported_efforts=("low", "medium", "high"),
             default_effort="medium",
         ),
@@ -49,16 +49,16 @@ class StubBackend(BaseModelBackend):
         super().__init__(model_id, max_concurrency=2, stream_chunk_size=5)
         self.load_count = 0
         self.unload_count = 0
-        self.requests: list[GenerationRequest] = []
+        self.requests: list[OCSGenerationRequest] = []
 
     def load_model(self) -> dict[str, Any]:
         self.load_count += 1
         return {"ready": True}
 
-    def generate(self, request: GenerationRequest) -> list[GenerationResult]:
+    def generate(self, request: OCSGenerationRequest) -> list[OCSGenerationResult]:
         self.requests.append(request)
         return [
-            GenerationResult(
+            OCSGenerationResult(
                 content=f"answer-{index}",
                 reasoning_content=f"reason-{index}",
                 prompt_tokens=3,

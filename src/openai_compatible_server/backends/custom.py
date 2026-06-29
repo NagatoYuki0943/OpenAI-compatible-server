@@ -8,11 +8,11 @@ from typing import Any
 
 from openai_compatible_server.backends.base import (
     BaseModelBackend,
-    GenerationChunk,
-    GenerationRequest,
-    GenerationResult,
-    ModelMetadata,
-    ReasoningMetadata,
+    OCSGenerationChunk,
+    OCSGenerationRequest,
+    OCSGenerationResult,
+    OCSModelMetadata,
+    OCSReasoningMetadata,
 )
 
 _STREAM_END = object()
@@ -60,14 +60,14 @@ class CustomModelBackend(BaseModelBackend):
         "skip_special_tokens": True,
         "spaces_between_special_tokens": True,
     }
-    model_metadata = ModelMetadata(
+    model_metadata = OCSModelMetadata(
         name="My Custom Model",
         description="Example custom multimodal reasoning model.",
         capabilities=("reasoning", "image-recognition", "function-call"),
         input_modalities=("text", "image"),
         output_modalities=("text",),
         supports_streaming=True,
-        reasoning=ReasoningMetadata(
+        reasoning=OCSReasoningMetadata(
             supported_efforts=("low", "medium", "high"),
             default_effort="medium",
             min_thinking_tokens=0,
@@ -81,8 +81,8 @@ class CustomModelBackend(BaseModelBackend):
         # Replace this with tokenizer/model/pipeline loading.
         return ExampleStringModel()
 
-    def generate(self, request: GenerationRequest) -> list[GenerationResult]:
-        results: list[GenerationResult] = []
+    def generate(self, request: OCSGenerationRequest) -> list[OCSGenerationResult]:
+        results: list[OCSGenerationResult] = []
         for _ in range(request.n):
             content = self.model.generate(
                 request.messages,
@@ -92,14 +92,16 @@ class CustomModelBackend(BaseModelBackend):
             if not isinstance(content, str):
                 raise TypeError("model.generate(stream=False) must return str")
             results.append(
-                GenerationResult(
+                OCSGenerationResult(
                     content=content,
                     reasoning_content="Optional reasoning output",
                 )
             )
         return results
 
-    async def stream_generate(self, request: GenerationRequest) -> AsyncIterator[GenerationChunk]:
+    async def stream_generate(
+        self, request: OCSGenerationRequest
+    ) -> AsyncIterator[OCSGenerationChunk]:
         self._ensure_loaded()
         request = self.with_generation_defaults(request)
         async with self._inference_semaphore:
@@ -120,9 +122,9 @@ class CustomModelBackend(BaseModelBackend):
                         break
                     if not isinstance(item, str):
                         raise TypeError("model.generate(stream=True) must yield str")
-                    yield GenerationChunk(index=index, content=item)
+                    yield OCSGenerationChunk(index=index, content=item)
 
-                yield GenerationChunk(index=index, finish_reason="stop")
+                yield OCSGenerationChunk(index=index, finish_reason="stop")
 
     def unload_model(self) -> None:
         # Release GPU memory or other external resources here.

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from openai_compatible_server.backends import GenerationRequest
+from openai_compatible_server.backends import OCSGenerationRequest
 from openai_compatible_server.backends.custom import CustomModelBackend
 from openai_compatible_server.backends.factory import create_model_backend
 from openai_compatible_server.config import Settings
@@ -37,15 +37,17 @@ def test_factory_loads_backend_from_python_file(tmp_path: Path) -> None:
             [
                 "from typing import Any",
                 "from openai_compatible_server.backends import (",
-                "    BaseModelBackend, GenerationRequest, GenerationResult",
+                "    BaseModelBackend, OCSGenerationRequest, OCSGenerationResult",
                 ")",
                 "",
                 "class FileBackend(BaseModelBackend):",
                 "    def load_model(self) -> Any:",
                 "        return {'ready': True}",
                 "",
-                "    def generate(self, request: GenerationRequest):",
-                "        return [GenerationResult(content='file') for _ in range(request.n)]",
+                "    def generate(self, request: OCSGenerationRequest):",
+                "        return [",
+                "            OCSGenerationResult(content='file') for _ in range(request.n)",
+                "        ]",
             ]
         ),
         encoding="utf-8",
@@ -70,7 +72,7 @@ async def test_custom_backend_stream_generate_yields_model_chunks(tmp_path: Path
         )
     )
     await backend.load()
-    request = GenerationRequest(
+    request = OCSGenerationRequest(
         model="factory-test-model",
         messages=[{"role": "user", "content": "hello"}],
         sampling_params={},

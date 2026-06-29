@@ -1,6 +1,6 @@
 import pytest
 
-from openai_compatible_server.backends import GenerationRequest
+from openai_compatible_server.backends import OCSGenerationRequest
 
 
 async def test_backend_lifecycle_is_idempotent(backend) -> None:
@@ -30,7 +30,7 @@ def test_model_card_contains_openai_and_capability_metadata(backend) -> None:
 
 async def test_generate_and_default_stream_adapter(backend) -> None:
     await backend.load()
-    request = GenerationRequest(
+    request = OCSGenerationRequest(
         model="test-model",
         messages=[{"role": "user", "content": "hello"}],
         sampling_params={"top_k": 7},
@@ -56,7 +56,7 @@ async def test_generate_and_default_stream_adapter(backend) -> None:
 
 
 def test_generation_defaults_validate_minimum_tokens(backend) -> None:
-    request = GenerationRequest(
+    request = OCSGenerationRequest(
         model="test-model",
         messages=[{"role": "user", "content": "hello"}],
         sampling_params={"max_tokens": 1},

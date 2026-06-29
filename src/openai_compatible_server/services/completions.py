@@ -11,8 +11,8 @@ from loguru import logger
 
 from openai_compatible_server.backends import (
     BaseModelBackend,
-    GenerationRequest,
-    GenerationResult,
+    OCSGenerationRequest,
+    OCSGenerationResult,
 )
 from openai_compatible_server.schemas import ChatMessage, ChatRequest
 
@@ -148,7 +148,7 @@ class CompletionService:
 
             if request.stream_options and request.stream_options.include_usage:
                 results = [
-                    GenerationResult(
+                    OCSGenerationResult(
                         content=outputs[index],
                         reasoning_content=reasoning_outputs[index],
                     )
@@ -197,8 +197,8 @@ def text_and_media(messages: list[ChatMessage]) -> tuple[str, list[str]]:
     return "\n".join(texts), media
 
 
-def _backend_request(request: ChatRequest, request_id: str | None) -> GenerationRequest:
-    return GenerationRequest(
+def _backend_request(request: ChatRequest, request_id: str | None) -> OCSGenerationRequest:
+    return OCSGenerationRequest(
         model=request.model,
         messages=[message.model_dump(exclude_none=True) for message in request.messages],
         sampling_params=request.sampling_params(),
@@ -212,7 +212,7 @@ def _backend_request(request: ChatRequest, request_id: str | None) -> Generation
     )
 
 
-def _usage_for(request: ChatRequest, results: list[GenerationResult]) -> dict[str, Any]:
+def _usage_for(request: ChatRequest, results: list[OCSGenerationResult]) -> dict[str, Any]:
     prompt_text, _ = text_and_media(request.messages)
     prompt_tokens = next(
         (item.prompt_tokens for item in results if item.prompt_tokens is not None),

@@ -33,7 +33,7 @@ ReasoningEffort = Literal["none", "minimal", "low", "medium", "high", "xhigh", "
 
 
 @dataclass(frozen=True, slots=True)
-class ReasoningMetadata:
+class OCSReasoningMetadata:
     type: str = "effort"
     supported_efforts: tuple[ReasoningEffort, ...] = ()
     default_effort: ReasoningEffort | None = None
@@ -60,7 +60,7 @@ class ReasoningMetadata:
 
 
 @dataclass(frozen=True, slots=True)
-class ModelMetadata:
+class OCSModelMetadata:
     name: str | None = None
     description: str | None = None
     owned_by: str = "local"
@@ -69,7 +69,7 @@ class ModelMetadata:
     input_modalities: tuple[Modality, ...] = ("text",)
     output_modalities: tuple[Modality, ...] = ("text",)
     supports_streaming: bool = True
-    reasoning: ReasoningMetadata | None = None
+    reasoning: OCSReasoningMetadata | None = None
     context_window: int | None = None
     max_input_tokens: int | None = None
     max_output_tokens: int | None = None
@@ -108,7 +108,7 @@ class ModelMetadata:
 
 
 @dataclass(slots=True)
-class GenerationRequest:
+class OCSGenerationRequest:
     model: str
     messages: list[dict[str, Any]]
     sampling_params: dict[str, Any]
@@ -118,7 +118,7 @@ class GenerationRequest:
 
 
 @dataclass(slots=True)
-class GenerationResult:
+class OCSGenerationResult:
     content: str = ""
     reasoning_content: str | None = None
     finish_reason: str = "stop"
@@ -131,7 +131,7 @@ class GenerationResult:
 
 
 @dataclass(slots=True)
-class GenerationChunk:
+class OCSGenerationChunk:
     index: int
     content: str | None = None
     reasoning_content: str | None = None
@@ -143,7 +143,7 @@ class GenerationChunk:
 
 
 class BaseModelBackend(ABC):
-    model_metadata: ModelMetadata | None = None
+    model_metadata: OCSModelMetadata | None = None
     generation_defaults: ClassVar[Mapping[str, Any]] = {}
 
     def __init__(
@@ -164,9 +164,9 @@ class BaseModelBackend(ABC):
     def is_loaded(self) -> bool:
         return self._loaded
 
-    def get_model_metadata(self) -> ModelMetadata:
+    def get_model_metadata(self) -> OCSModelMetadata:
         """Return metadata advertised by ``GET /v1/models``."""
-        return self.model_metadata or ModelMetadata()
+        return self.model_metadata or OCSModelMetadata()
 
     def model_card(self) -> dict[str, Any]:
         return self.get_model_metadata().to_model_card(self.model_id)
@@ -218,7 +218,7 @@ class BaseModelBackend(ABC):
                 (time.perf_counter() - started_at) * 1000,
             )
 
-    async def infer(self, request: GenerationRequest) -> list[GenerationResult]:
+    async def infer(self, request: OCSGenerationRequest) -> list[OCSGenerationResult]:
         self._ensure_loaded()
         request = self.with_generation_defaults(request)
         started_at = time.perf_counter()
@@ -252,7 +252,7 @@ class BaseModelBackend(ABC):
         )
         return results
 
-    def with_generation_defaults(self, request: GenerationRequest) -> GenerationRequest:
+    def with_generation_defaults(self, request: OCSGenerationRequest) -> OCSGenerationRequest:
         """Return a request with model defaults overridden by explicit client parameters."""
         sampling_params = {
             **self.generation_defaults,
@@ -264,7 +264,9 @@ class BaseModelBackend(ABC):
             raise ValueError("min_tokens cannot exceed the maximum output token count")
         return replace(request, sampling_params=sampling_params)
 
-    async def stream_generate(self, request: GenerationRequest) -> AsyncIterator[GenerationChunk]:
+    async def stream_generate(
+        self, request: OCSGenerationRequest
+    ) -> AsyncIterator[OCSGenerationChunk]:
         results = await self.infer(request)
         prompt_tokens = next(
             (item.prompt_tokens for item in results if item.prompt_tokens is not None),
@@ -283,14 +285,14 @@ class BaseModelBackend(ABC):
         for index, result in enumerate(results):
             if result.reasoning_content:
                 for start in range(0, len(result.reasoning_content), self.stream_chunk_size):
-                    yield GenerationChunk(
+                    yield OCSGenerationChunk(
                         index=index,
                         reasoning_content=result.reasoning_content[
                             start : start + self.stream_chunk_size
                         ],
                     )
             for start in range(0, len(result.content), self.stream_chunk_size):
-                yield GenerationChunk(
+                yield OCSGenerationChunk(
                     index=index,
                     content=result.content[start : start + self.stream_chunk_size],
                 )
@@ -307,7 +309,7 @@ class BaseModelBackend(ABC):
                     "total_tokens": prompt_tokens + completion_tokens,
                     "completion_tokens_details": {"reasoning_tokens": reasoning_tokens},
                 }
-            yield GenerationChunk(
+            yield OCSGenerationChunk(
                 index=index,
                 finish_reason=result.finish_reason,
                 tool_calls=result.tool_calls,
@@ -320,7 +322,7 @@ class BaseModelBackend(ABC):
         """Load tokenizer/model resources and return the model object."""
 
     @abstractmethod
-    def generate(self, request: GenerationRequest) -> list[GenerationResult]:
+    def generate(self, request: OCSGenerationRequest) -> list[OCSGenerationResult]:
         """Run synchronous generation in a worker thread."""
 
     def unload_model(self) -> None:

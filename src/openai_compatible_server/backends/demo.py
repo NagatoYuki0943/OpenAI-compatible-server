@@ -4,10 +4,10 @@ from typing import Any
 
 from openai_compatible_server.backends.base import (
     BaseModelBackend,
-    GenerationRequest,
-    GenerationResult,
-    ModelMetadata,
-    ReasoningMetadata,
+    OCSGenerationRequest,
+    OCSGenerationResult,
+    OCSModelMetadata,
+    OCSReasoningMetadata,
 )
 
 
@@ -29,7 +29,7 @@ class DemoModelBackend(BaseModelBackend):
         "skip_special_tokens": True,
         "spaces_between_special_tokens": True,
     }
-    model_metadata = ModelMetadata(
+    model_metadata = OCSModelMetadata(
         name="Demo Multimodal Model",
         description="Demonstration backend for the OpenAI-compatible server.",
         capabilities=(
@@ -42,7 +42,7 @@ class DemoModelBackend(BaseModelBackend):
         input_modalities=("text", "image", "audio", "video"),
         output_modalities=("text",),
         supports_streaming=True,
-        reasoning=ReasoningMetadata(
+        reasoning=OCSReasoningMetadata(
             type="effort",
             supported_efforts=("none", "minimal", "low", "medium", "high"),
             default_effort="medium",
@@ -55,7 +55,7 @@ class DemoModelBackend(BaseModelBackend):
     def load_model(self) -> dict[str, str]:
         return {"model_id": self.model_id, "type": "demo"}
 
-    def generate(self, request: GenerationRequest) -> list[GenerationResult]:
+    def generate(self, request: OCSGenerationRequest) -> list[OCSGenerationResult]:
         text, media = _extract_inputs(request.messages)
         media_text = f" Media received: {', '.join(media)}." if media else ""
         results = []
@@ -69,7 +69,7 @@ class DemoModelBackend(BaseModelBackend):
                 f"{media_text} Last text: {text[-200:] or '(none)'}"
             )
             results.append(
-                GenerationResult(
+                OCSGenerationResult(
                     content=content,
                     reasoning_content=reasoning,
                     prompt_tokens=_estimate_tokens(text),

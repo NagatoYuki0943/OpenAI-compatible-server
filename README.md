@@ -218,8 +218,8 @@ Custom backends can also declare metadata returned by `GET /v1/models`:
 ```python
 from openai_compatible_server.backends import (
     BaseModelBackend,
-    ModelMetadata,
-    ReasoningMetadata,
+    OCSModelMetadata,
+    OCSReasoningMetadata,
 )
 
 
@@ -241,7 +241,7 @@ class MyModelBackend(BaseModelBackend):
         "skip_special_tokens": True,
         "spaces_between_special_tokens": True,
     }
-    model_metadata = ModelMetadata(
+    model_metadata = OCSModelMetadata(
         name="My Model",
         capabilities=(
             "reasoning",
@@ -253,7 +253,7 @@ class MyModelBackend(BaseModelBackend):
         input_modalities=("text", "image"),
         output_modalities=("text",),
         supports_streaming=True,
-        reasoning=ReasoningMetadata(
+        reasoning=OCSReasoningMetadata(
             supported_efforts=("low", "medium", "high"),
             default_effort="medium",
             max_thinking_tokens=8192,
