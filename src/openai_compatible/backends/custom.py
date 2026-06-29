@@ -1,14 +1,45 @@
 """Runnable custom backend example included in the installed package."""
 
+from __future__ import annotations
+
+import asyncio
+from collections.abc import AsyncIterator, Iterator
 from typing import Any
 
 from openai_compatible.backends.base import (
     BaseModelBackend,
+    GenerationChunk,
     GenerationRequest,
     GenerationResult,
     ModelMetadata,
     ReasoningMetadata,
 )
+
+_STREAM_END = object()
+
+
+def _next_stream_item(iterator: Iterator[str]) -> str | object:
+    return next(iterator, _STREAM_END)
+
+
+class ExampleStringModel:
+    """Tiny stand-in for a model whose generate method supports stream=True."""
+
+    def generate(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        stream: bool = False,
+        **sampling_params: Any,
+    ) -> str | Iterator[str]:
+        content = (
+            "Custom model response. "
+            f"messages={len(messages)}, "
+            f"temperature={sampling_params.get('temperature')}"
+        )
+        if not stream:
+            return content
+        return iter(("Custom ", "model ", "stream ", "response."))
 
 
 class CustomModelBackend(BaseModelBackend):
@@ -48,17 +79,50 @@ class CustomModelBackend(BaseModelBackend):
 
     def load_model(self) -> Any:
         # Replace this with tokenizer/model/pipeline loading.
-        return {"ready": True}
+        return ExampleStringModel()
 
-    def infer(self, request: GenerationRequest) -> list[GenerationResult]:
-        # Convert request.messages and pass request.sampling_params to your model.
-        return [
-            GenerationResult(
-                content=f"Custom model response {index + 1}",
-                reasoning_content="Optional reasoning output",
+    def generate(self, request: GenerationRequest) -> list[GenerationResult]:
+        results: list[GenerationResult] = []
+        for _ in range(request.n):
+            content = self.model.generate(
+                request.messages,
+                stream=False,
+                **request.sampling_params,
             )
-            for index in range(request.n)
-        ]
+            if not isinstance(content, str):
+                raise TypeError("model.generate(stream=False) must return str")
+            results.append(
+                GenerationResult(
+                    content=content,
+                    reasoning_content="Optional reasoning output",
+                )
+            )
+        return results
+
+    async def stream_generate(self, request: GenerationRequest) -> AsyncIterator[GenerationChunk]:
+        self._ensure_loaded()
+        request = self.with_generation_defaults(request)
+        async with self._inference_semaphore:
+            for index in range(request.n):
+                stream = await asyncio.to_thread(
+                    self.model.generate,
+                    request.messages,
+                    stream=True,
+                    **request.sampling_params,
+                )
+                if isinstance(stream, str):
+                    raise TypeError("model.generate(stream=True) must return an iterator of str")
+
+                iterator = iter(stream)
+                while True:
+                    item = await asyncio.to_thread(_next_stream_item, iterator)
+                    if item is _STREAM_END:
+                        break
+                    if not isinstance(item, str):
+                        raise TypeError("model.generate(stream=True) must yield str")
+                    yield GenerationChunk(index=index, content=item)
+
+                yield GenerationChunk(index=index, finish_reason="stop")
 
     def unload_model(self) -> None:
         # Release GPU memory or other external resources here.

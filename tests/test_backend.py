@@ -38,7 +38,7 @@ async def test_generate_and_default_stream_adapter(backend) -> None:
         request_id="request-1",
     )
 
-    results = await backend.generate(request)
+    results = await backend.infer(request)
     chunks = [chunk async for chunk in backend.stream_generate(request)]
 
     assert [result.content for result in results] == ["answer-0", "answer-1"]

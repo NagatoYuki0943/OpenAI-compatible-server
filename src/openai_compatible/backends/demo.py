@@ -55,7 +55,7 @@ class DemoModelBackend(BaseModelBackend):
     def load_model(self) -> dict[str, str]:
         return {"model_id": self.model_id, "type": "demo"}
 
-    def infer(self, request: GenerationRequest) -> list[GenerationResult]:
+    def generate(self, request: GenerationRequest) -> list[GenerationResult]:
         text, media = _extract_inputs(request.messages)
         media_text = f" Media received: {', '.join(media)}." if media else ""
         results = []

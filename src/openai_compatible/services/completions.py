@@ -26,7 +26,7 @@ class CompletionService:
         backend_request = self.backend.with_generation_defaults(
             _backend_request(request, request_id)
         )
-        results = await self.backend.generate(backend_request)
+        results = await self.backend.infer(backend_request)
         choices = []
         for index, result in enumerate(results):
             message: dict[str, Any] = {

@@ -203,7 +203,7 @@ ENV_FILE=/etc/openai-compatible/server.env openai-compatible-server
 
 ## Custom Model
 
-Subclass `BaseModelBackend` and implement `load_model()` and `infer()`. The
+Subclass `BaseModelBackend` and implement `load_model()` and `generate()`. The
 default `stream_generate()` converts complete results to SSE chunks; override it
 when the model supports native token streaming.
 

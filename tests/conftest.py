@@ -55,7 +55,7 @@ class StubBackend(BaseModelBackend):
         self.load_count += 1
         return {"ready": True}
 
-    def infer(self, request: GenerationRequest) -> list[GenerationResult]:
+    def generate(self, request: GenerationRequest) -> list[GenerationResult]:
         self.requests.append(request)
         return [
             GenerationResult(

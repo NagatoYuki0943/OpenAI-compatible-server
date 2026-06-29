@@ -218,7 +218,7 @@ class BaseModelBackend(ABC):
                 (time.perf_counter() - started_at) * 1000,
             )
 
-    async def generate(self, request: GenerationRequest) -> list[GenerationResult]:
+    async def infer(self, request: GenerationRequest) -> list[GenerationResult]:
         self._ensure_loaded()
         request = self.with_generation_defaults(request)
         started_at = time.perf_counter()
@@ -231,7 +231,7 @@ class BaseModelBackend(ABC):
         )
         try:
             async with self._inference_semaphore:
-                results = await asyncio.to_thread(self.infer, request)
+                results = await asyncio.to_thread(self.generate, request)
             if len(results) != request.n:
                 raise RuntimeError(
                     f"Backend returned {len(results)} result(s), expected {request.n}"
@@ -265,7 +265,7 @@ class BaseModelBackend(ABC):
         return replace(request, sampling_params=sampling_params)
 
     async def stream_generate(self, request: GenerationRequest) -> AsyncIterator[GenerationChunk]:
-        results = await self.generate(request)
+        results = await self.infer(request)
         prompt_tokens = next(
             (item.prompt_tokens for item in results if item.prompt_tokens is not None),
             None,
@@ -320,8 +320,8 @@ class BaseModelBackend(ABC):
         """Load tokenizer/model resources and return the model object."""
 
     @abstractmethod
-    def infer(self, request: GenerationRequest) -> list[GenerationResult]:
-        """Run synchronous inference in a worker thread."""
+    def generate(self, request: GenerationRequest) -> list[GenerationResult]:
+        """Run synchronous generation in a worker thread."""
 
     def unload_model(self) -> None:
         """Release model resources. Override for GPU cleanup."""

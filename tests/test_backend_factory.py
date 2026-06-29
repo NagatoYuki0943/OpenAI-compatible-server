@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from openai_compatible.backends import GenerationRequest
 from openai_compatible.backends.custom import CustomModelBackend
 from openai_compatible.backends.factory import create_model_backend
 from openai_compatible.config import Settings
@@ -43,7 +44,7 @@ def test_factory_loads_backend_from_python_file(tmp_path: Path) -> None:
                 "    def load_model(self) -> Any:",
                 "        return {'ready': True}",
                 "",
-                "    def infer(self, request: GenerationRequest):",
+                "    def generate(self, request: GenerationRequest):",
                 "        return [GenerationResult(content='file') for _ in range(request.n)]",
             ]
         ),
@@ -59,3 +60,23 @@ def test_factory_loads_backend_from_python_file(tmp_path: Path) -> None:
 def test_factory_error_explains_supported_backend_paths(tmp_path: Path) -> None:
     with pytest.raises(ModuleNotFoundError, match=r"\.py file path"):
         create_model_backend(_settings(tmp_path, "missing_package.backend:Backend"))
+
+
+async def test_custom_backend_stream_generate_yields_model_chunks(tmp_path: Path) -> None:
+    backend = create_model_backend(
+        _settings(
+            tmp_path,
+            "openai_compatible.backends.custom:CustomModelBackend",
+        )
+    )
+    await backend.load()
+    request = GenerationRequest(
+        model="factory-test-model",
+        messages=[{"role": "user", "content": "hello"}],
+        sampling_params={},
+    )
+
+    chunks = [chunk async for chunk in backend.stream_generate(request)]
+
+    assert "".join(chunk.content or "" for chunk in chunks) == "Custom model stream response."
+    assert chunks[-1].finish_reason == "stop"
