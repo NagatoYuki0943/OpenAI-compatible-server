@@ -10,8 +10,8 @@ import aiohttp
 import httpx
 import requests
 
-from openai_compatible.clients.common import build_request
-from openai_compatible.config import read_configuration
+from openai_compatible_server.clients.common import build_request
+from openai_compatible_server.config import read_configuration
 
 
 def iter_sse_lines(lines: Iterable[str]) -> Iterator[dict[str, Any]]:

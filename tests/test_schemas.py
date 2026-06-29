@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from openai_compatible.schemas import ChatRequest
+from openai_compatible_server.schemas import ChatRequest
 
 
 def test_sampling_params_support_openai_and_vllm_extensions() -> None:

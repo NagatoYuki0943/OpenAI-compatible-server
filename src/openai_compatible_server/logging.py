@@ -4,7 +4,7 @@ import sys
 
 from loguru import logger
 
-from openai_compatible.config import Settings
+from openai_compatible_server.config import Settings
 
 LOG_FORMAT = (
     "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | "

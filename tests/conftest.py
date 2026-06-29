@@ -4,14 +4,14 @@ from typing import Any
 
 import pytest
 
-from openai_compatible.backends import (
+from openai_compatible_server.backends import (
     BaseModelBackend,
     GenerationRequest,
     GenerationResult,
     ModelMetadata,
     ReasoningMetadata,
 )
-from openai_compatible.config import Settings
+from openai_compatible_server.config import Settings
 
 
 class StubBackend(BaseModelBackend):

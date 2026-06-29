@@ -1,6 +1,6 @@
 import pytest
 
-from openai_compatible.backends import GenerationRequest
+from openai_compatible_server.backends import GenerationRequest
 
 
 async def test_backend_lifecycle_is_idempotent(backend) -> None:

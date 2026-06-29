@@ -9,12 +9,12 @@ from typing import Any
 
 from loguru import logger
 
-from openai_compatible.backends import (
+from openai_compatible_server.backends import (
     BaseModelBackend,
     GenerationRequest,
     GenerationResult,
 )
-from openai_compatible.schemas import ChatMessage, ChatRequest
+from openai_compatible_server.schemas import ChatMessage, ChatRequest
 
 
 class CompletionService:
@@ -53,7 +53,7 @@ class CompletionService:
             "model": request.model,
             "choices": choices,
             "usage": _usage_for(request, results),
-            "system_fingerprint": "fp_demo_openai_compatible",
+            "system_fingerprint": "fp_demo_openai_compatible_server",
             "service_tier": request.service_tier,
         }
         logger.debug(
@@ -74,7 +74,7 @@ class CompletionService:
             "object": "chat.completion.chunk",
             "created": int(time.time()),
             "model": request.model,
-            "system_fingerprint": "fp_demo_openai_compatible",
+            "system_fingerprint": "fp_demo_openai_compatible_server",
             "service_tier": request.service_tier,
         }
         outputs = ["" for _ in range(request.n)]

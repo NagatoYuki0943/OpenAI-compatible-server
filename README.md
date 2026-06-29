@@ -8,7 +8,7 @@ pluggable model backends.
 
 ```powershell
 uv sync
-uv run openai-compatible-init-env
+uv run openai-compatible-server-init-env
 uv run openai-compatible-server
 ```
 
@@ -16,7 +16,7 @@ On Bash, Zsh, or Fish:
 
 ```bash
 uv sync
-uv run openai-compatible-init-env
+uv run openai-compatible-server-init-env
 uv run openai-compatible-server
 ```
 
@@ -38,19 +38,19 @@ uv run openai-compatible-server
 Create `.env` in the current directory:
 
 ```powershell
-uv run openai-compatible-init-env
+uv run openai-compatible-server-init-env
 ```
 
 Create an editable custom model backend in the current directory:
 
 ```powershell
-uv run openai-compatible-init-backend
+uv run openai-compatible-server-init-backend
 ```
 
 Call it with a generic HTTP client:
 
 ```powershell
-uv run openai-compatible-http-client `
+uv run openai-compatible-server-http-client `
   --client httpx-async `
   --url http://127.0.0.1:8000/v1/chat/completions `
   --model demo-multimodal-model `
@@ -61,7 +61,7 @@ uv run openai-compatible-http-client `
 Call it with the OpenAI SDK:
 
 ```powershell
-uv run openai-compatible-openai-sdk-client `
+uv run openai-compatible-server-openai-sdk-client `
   --base-url http://127.0.0.1:8000/v1 `
   --model demo-multimodal-model `
   --prompt "Describe the input." `
@@ -71,7 +71,7 @@ uv run openai-compatible-openai-sdk-client `
 Both clients support common generation and multimodal options:
 
 ```powershell
-uv run openai-compatible-openai-sdk-client `
+uv run openai-compatible-server-openai-sdk-client `
   --api-key "your-api-key" `
   --model "my-model" `
   --prompt "What is in this image?" `
@@ -97,14 +97,14 @@ uv run openai-compatible-openai-sdk-client `
 Show all client options:
 
 ```powershell
-uv run openai-compatible-http-client --help
-uv run openai-compatible-openai-sdk-client --help
+uv run openai-compatible-server-http-client --help
+uv run openai-compatible-server-openai-sdk-client --help
 ```
 
 Development and packaging commands:
 
 ```powershell
-uv run openai-compatible-build-wheel
+uv run openai-compatible-server-build-wheel
 uv run pytest
 uv run ruff check .
 ```
@@ -114,14 +114,14 @@ uv run ruff check .
 Build a clean wheel into `dist/`:
 
 ```powershell
-uv run openai-compatible-build-wheel
+uv run openai-compatible-server-build-wheel
 ```
 
 Use another output directory or preserve existing wheels:
 
 ```powershell
-uv run openai-compatible-build-wheel --out-dir artifacts
-uv run openai-compatible-build-wheel --no-clean
+uv run openai-compatible-server-build-wheel --out-dir artifacts
+uv run openai-compatible-server-build-wheel --no-clean
 ```
 
 The equivalent native uv command is:
@@ -143,8 +143,8 @@ tools. `uv` is not required on the target computer:
 
 ```bash
 python -m pip install dist/openai_compatible_server-0.1.0-py3-none-any.whl
-openai-compatible-init-env
-openai-compatible-init-backend
+openai-compatible-server-init-env
+openai-compatible-server-init-backend
 openai-compatible-server
 ```
 
@@ -152,17 +152,17 @@ You can also start the server through its Python module. This is useful when
 the Python `bin` or `Scripts` directory is not available in `PATH`:
 
 ```bash
-python -m openai_compatible
+python -m openai_compatible_server
 ```
 
-Run `openai-compatible-init-env` from any directory to create `.env` there. The
+Run `openai-compatible-server-init-env` from any directory to create `.env` there. The
 server reads `.env` from its startup directory, so initialize and start it from
 the same directory:
 
 ```bash
 mkdir my-openai-server
 cd my-openai-server
-openai-compatible-init-env
+openai-compatible-server-init-env
 openai-compatible-server
 ```
 
@@ -170,15 +170,15 @@ Use `--force` to overwrite an existing file. `--output` can select another
 filename, but the server then needs `ENV_FILE` to point to it:
 
 ```bash
-openai-compatible-init-env --force
-openai-compatible-init-env --output server.env
+openai-compatible-server-init-env --force
+openai-compatible-server-init-env --output server.env
 ENV_FILE=server.env openai-compatible-server
 ```
 
 Create a custom backend template and select it in `.env`:
 
 ```bash
-openai-compatible-init-backend
+openai-compatible-server-init-backend
 ```
 
 ```dotenv
@@ -187,18 +187,18 @@ MODEL_BACKEND_CLASS=./custom_backend.py:CustomModelBackend
 ```
 
 The command refuses to overwrite an existing `custom_backend.py`. Use
-`openai-compatible-init-backend --force` to replace it, or `--output` to choose
+`openai-compatible-server-init-backend --force` to replace it, or `--output` to choose
 another Python filename.
 
 To keep configuration elsewhere, set only `ENV_FILE` before startup:
 
 ```powershell
-$env:ENV_FILE = "C:\config\openai-compatible.env"
+$env:ENV_FILE = "C:\config\openai-compatible-server.env"
 openai-compatible-server
 ```
 
 ```bash
-ENV_FILE=/etc/openai-compatible/server.env openai-compatible-server
+ENV_FILE=/etc/openai-compatible-server/server.env openai-compatible-server
 ```
 
 ## Custom Model
@@ -210,13 +210,13 @@ when the model supports native token streaming.
 Generate a ready-to-edit implementation in the current directory:
 
 ```bash
-openai-compatible-init-backend
+openai-compatible-server-init-backend
 ```
 
 Custom backends can also declare metadata returned by `GET /v1/models`:
 
 ```python
-from openai_compatible.backends import (
+from openai_compatible_server.backends import (
     BaseModelBackend,
     ModelMetadata,
     ReasoningMetadata,
@@ -306,13 +306,13 @@ model ID to select parameters, reasoning controls, endpoint behavior, and other
 model-specific compatibility logic.
 
 The package includes a runnable example backend at
-`openai_compatible.backends.custom:CustomModelBackend`. The source-tree alias
+`openai_compatible_server.backends.custom:CustomModelBackend`. The source-tree alias
 is also available at `examples/custom_backend.py`.
 
 Configure the packaged example:
 
 ```dotenv
-MODEL_BACKEND_CLASS=openai_compatible.backends.custom:CustomModelBackend
+MODEL_BACKEND_CLASS=openai_compatible_server.backends.custom:CustomModelBackend
 MODEL_ID=my-model
 MODEL_MAX_CONCURRENCY=2
 ```

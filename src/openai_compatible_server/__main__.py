@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import uvicorn
 
-from openai_compatible.config import Settings
+from openai_compatible_server.config import Settings
 
 
 def main() -> None:
     settings = Settings.from_env()
     uvicorn.run(
-        "openai_compatible.api:create_app",
+        "openai_compatible_server.api:create_app",
         host=settings.host,
         port=settings.port,
         reload=settings.reload,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from openai_compatible.backends.base import (
+from openai_compatible_server.backends.base import (
     BaseModelBackend,
     GenerationRequest,
     GenerationResult,

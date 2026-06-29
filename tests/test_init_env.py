@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from openai_compatible.config import Settings
-from openai_compatible.init_env import create_env_file, env_template
+from openai_compatible_server.config import Settings
+from openai_compatible_server.init_env import create_env_file, env_template
 
 
 def test_create_env_file_in_current_directory(

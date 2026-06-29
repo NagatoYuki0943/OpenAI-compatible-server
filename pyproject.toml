@@ -17,12 +17,12 @@ dependencies = [
 ]
 
 [project.scripts]
-openai-compatible-server = "openai_compatible.__main__:main"
-openai-compatible-http-client = "openai_compatible.clients.http:main"
-openai-compatible-openai-sdk-client = "openai_compatible.clients.openai_sdk:main"
-openai-compatible-build-wheel = "openai_compatible.build:main"
-openai-compatible-init-env = "openai_compatible.init_env:main"
-openai-compatible-init-backend = "openai_compatible.init_backend:main"
+openai-compatible-server = "openai_compatible_server.__main__:main"
+openai-compatible-server-http-client = "openai_compatible_server.clients.http:main"
+openai-compatible-server-openai-sdk-client = "openai_compatible_server.clients.openai_sdk:main"
+openai-compatible-server-build-wheel = "openai_compatible_server.build:main"
+openai-compatible-server-init-env = "openai_compatible_server.init_env:main"
+openai-compatible-server-init-backend = "openai_compatible_server.init_backend:main"
 
 [dependency-groups]
 dev = [
@@ -36,7 +36,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/openai_compatible"]
+packages = ["src/openai_compatible_server"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"

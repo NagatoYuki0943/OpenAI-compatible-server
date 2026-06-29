@@ -11,12 +11,12 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 from loguru import logger
 
-from openai_compatible.backends import BaseModelBackend, create_model_backend
-from openai_compatible.config import Settings
-from openai_compatible.logging import configure_logging
-from openai_compatible.schemas import ChatRequest
-from openai_compatible.services import CompletionService
-from openai_compatible.services.completions import text_and_media
+from openai_compatible_server.backends import BaseModelBackend, create_model_backend
+from openai_compatible_server.config import Settings
+from openai_compatible_server.logging import configure_logging
+from openai_compatible_server.schemas import ChatRequest
+from openai_compatible_server.services import CompletionService
+from openai_compatible_server.services.completions import text_and_media
 
 
 def create_app(

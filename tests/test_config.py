@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from openai_compatible.config import Settings, read_configuration
+from openai_compatible_server.config import Settings, read_configuration
 
 
 def test_settings_load_from_dotenv(tmp_path: Path) -> None:

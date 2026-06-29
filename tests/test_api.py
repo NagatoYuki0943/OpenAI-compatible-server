@@ -4,7 +4,7 @@ import json
 
 from fastapi.testclient import TestClient
 
-from openai_compatible.api import create_app
+from openai_compatible_server.api import create_app
 
 
 def test_health_models_and_backend_lifecycle(settings, backend) -> None:
@@ -113,7 +113,7 @@ def test_streaming_completion_reassembles_content(settings, backend) -> None:
 
 
 def test_authentication_and_validation_errors(tmp_path, backend) -> None:
-    from openai_compatible.config import Settings
+    from openai_compatible_server.config import Settings
 
     app = create_app(
         Settings(api_key="secret", model_id="test-model", log_dir=tmp_path / "logs"),

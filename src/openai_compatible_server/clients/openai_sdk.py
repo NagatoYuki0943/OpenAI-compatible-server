@@ -5,8 +5,8 @@ from typing import Any
 
 from openai import OpenAI
 
-from openai_compatible.clients.common import build_messages
-from openai_compatible.config import read_configuration
+from openai_compatible_server.clients.common import build_messages
+from openai_compatible_server.config import read_configuration
 
 
 def create_parser() -> argparse.ArgumentParser:

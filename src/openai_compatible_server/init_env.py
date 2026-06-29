@@ -8,7 +8,7 @@ ENV_TEMPLATE_NAME = "env.example"
 
 
 def env_template() -> str:
-    return files("openai_compatible").joinpath(ENV_TEMPLATE_NAME).read_text(encoding="utf-8")
+    return files("openai_compatible_server").joinpath(ENV_TEMPLATE_NAME).read_text(encoding="utf-8")
 
 
 def create_env_file(destination: Path, *, force: bool = False) -> Path:

@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from openai_compatible.backends import GenerationRequest
-from openai_compatible.backends.custom import CustomModelBackend
-from openai_compatible.backends.factory import create_model_backend
-from openai_compatible.config import Settings
+from openai_compatible_server.backends import GenerationRequest
+from openai_compatible_server.backends.custom import CustomModelBackend
+from openai_compatible_server.backends.factory import create_model_backend
+from openai_compatible_server.config import Settings
 
 
 def _settings(tmp_path: Path, backend_class: str) -> Settings:
@@ -22,7 +22,7 @@ def test_factory_loads_installed_module_backend(tmp_path: Path) -> None:
     backend = create_model_backend(
         _settings(
             tmp_path,
-            "openai_compatible.backends.custom:CustomModelBackend",
+            "openai_compatible_server.backends.custom:CustomModelBackend",
         )
     )
 
@@ -36,7 +36,7 @@ def test_factory_loads_backend_from_python_file(tmp_path: Path) -> None:
         "\n".join(
             [
                 "from typing import Any",
-                "from openai_compatible.backends import (",
+                "from openai_compatible_server.backends import (",
                 "    BaseModelBackend, GenerationRequest, GenerationResult",
                 ")",
                 "",
@@ -66,7 +66,7 @@ async def test_custom_backend_stream_generate_yields_model_chunks(tmp_path: Path
     backend = create_model_backend(
         _settings(
             tmp_path,
-            "openai_compatible.backends.custom:CustomModelBackend",
+            "openai_compatible_server.backends.custom:CustomModelBackend",
         )
     )
     await backend.load()

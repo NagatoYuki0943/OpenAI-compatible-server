@@ -8,9 +8,9 @@ from types import ModuleType
 
 from loguru import logger
 
-from openai_compatible.backends.base import BaseModelBackend
-from openai_compatible.backends.demo import DemoModelBackend
-from openai_compatible.config import Settings
+from openai_compatible_server.backends.base import BaseModelBackend
+from openai_compatible_server.backends.demo import DemoModelBackend
+from openai_compatible_server.config import Settings
 
 
 def create_model_backend(settings: Settings) -> BaseModelBackend:
@@ -53,7 +53,7 @@ def _load_backend_module(module_or_path: str) -> ModuleType:
         if not path.is_file():
             raise FileNotFoundError(f"Model backend file was not found: {path}")
 
-        module_name = f"_openai_compatible_custom_{path.stem}_{abs(hash(path))}"
+        module_name = f"_openai_compatible_server_custom_{path.stem}_{abs(hash(path))}"
         spec = importlib.util.spec_from_file_location(module_name, path)
         if spec is None or spec.loader is None:
             raise ImportError(f"Could not load model backend file: {path}")
@@ -73,7 +73,7 @@ def _load_backend_module(module_or_path: str) -> ModuleType:
             raise ModuleNotFoundError(
                 f"Could not import model backend module {module_or_path!r}. "
                 "Use an installed Python module such as "
-                "'openai_compatible.backends.custom:CustomModelBackend', "
+                "'openai_compatible_server.backends.custom:CustomModelBackend', "
                 "or a .py file path such as "
                 "'.\\my_backend.py:MyModelBackend'."
             ) from exc

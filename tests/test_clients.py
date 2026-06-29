@@ -1,7 +1,7 @@
-from openai_compatible.clients.common import build_request
-from openai_compatible.clients.http import create_parser as create_http_parser
-from openai_compatible.clients.http import iter_sse_lines
-from openai_compatible.clients.openai_sdk import create_parser as create_sdk_parser
+from openai_compatible_server.clients.common import build_request
+from openai_compatible_server.clients.http import create_parser as create_http_parser
+from openai_compatible_server.clients.http import iter_sse_lines
+from openai_compatible_server.clients.openai_sdk import create_parser as create_sdk_parser
 
 
 def test_sse_parser_stops_at_done() -> None:

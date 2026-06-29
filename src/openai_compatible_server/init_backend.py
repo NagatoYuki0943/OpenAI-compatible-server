@@ -9,7 +9,7 @@ BACKEND_TEMPLATE_NAME = "custom.py"
 
 def backend_template() -> str:
     return (
-        files("openai_compatible.backends")
+        files("openai_compatible_server.backends")
         .joinpath(BACKEND_TEMPLATE_NAME)
         .read_text(encoding="utf-8")
     )

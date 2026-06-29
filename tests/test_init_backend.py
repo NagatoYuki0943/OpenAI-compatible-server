@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from openai_compatible.backends.base import BaseModelBackend
-from openai_compatible.backends.factory import create_model_backend
-from openai_compatible.config import Settings
-from openai_compatible.init_backend import backend_template, create_backend_file
+from openai_compatible_server.backends.base import BaseModelBackend
+from openai_compatible_server.backends.factory import create_model_backend
+from openai_compatible_server.config import Settings
+from openai_compatible_server.init_backend import backend_template, create_backend_file
 
 
 def test_create_backend_file_in_current_directory(
